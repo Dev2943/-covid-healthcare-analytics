@@ -14,7 +14,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s — %(levelname)s — %(message)s")
 logger = logging.getLogger(__name__)
 
-OWID_URL = "https://covid.ourworldindata.org/data/owid-covid-data.csv"
+OWID_URL = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
 CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "owid_covid_data.csv")
 
 # Columns we care about for this project
