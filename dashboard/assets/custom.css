@@ -1,0 +1,95 @@
+/* ── Date Pickers Dark Theme ── */
+.DateInput_input, .DateInput_input_1 {
+    background-color: #0d1117 !important;
+    color: #e8eaf6 !important;
+    border-bottom: 2px solid #1a73e8 !important;
+    font-size: 0.85rem !important;
+    padding: 6px 10px !important;
+}
+.DateInput, .DateInput_1 {
+    background-color: #0d1117 !important;
+}
+.SingleDatePickerInput, .SingleDatePickerInput__withBorder,
+.DateRangePickerInput, .DateRangePickerInput__withBorder {
+    background-color: #0d1117 !important;
+    border: 1px solid #1a73e8 !important;
+    border-radius: 6px !important;
+}
+.DateRangePickerInput_arrow_svg { fill: #1a73e8 !important; }
+.DayPicker__withBorder { background-color: #1c1f2e !important; }
+.CalendarMonth, .CalendarMonthGrid { background: #1c1f2e !important; }
+.CalendarMonth_caption { color: #e8eaf6 !important; }
+.CalendarDay__default {
+    background: #1c1f2e !important;
+    color: #e8eaf6 !important;
+    border-color: #2a2d3e !important;
+}
+.CalendarDay__selected { background: #1a73e8 !important; color: white !important; }
+.CalendarDay__hovered_span, .CalendarDay__selected_span {
+    background: #1a73e899 !important; color: white !important;
+}
+.DayPickerNavigation_button__default {
+    background: #0d1117 !important;
+    border-color: #2a2d3e !important;
+}
+.DayPickerNavigation_svg__horizontal { fill: #e8eaf6 !important; }
+.DayPicker_weekHeader_li small { color: #1a73e8 !important; }
+
+/* ── Global Spacing ── */
+.container-fluid {
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+}
+
+/* ── Tab spacing ── */
+.nav-tabs { margin-bottom: 16px !important; }
+.tab-content { padding-top: 8px !important; }
+
+/* ── Card spacing ── */
+.card { margin-bottom: 16px !important; }
+.card-body { padding: 16px 20px !important; }
+
+/* ── Row spacing ── */
+.row { margin-bottom: 12px !important; }
+
+/* ── Graph spacing ── */
+.js-plotly-plot {
+    padding: 8px !important;
+    border-radius: 8px !important;
+}
+
+/* ── Dropdown spacing ── */
+.Select-control { padding: 2px 6px !important; }
+.VirtualizedSelectOption { padding: 8px 14px !important; }
+
+/* ── Label spacing ── */
+label {
+    margin-bottom: 6px !important;
+    letter-spacing: 0.03em !important;
+}
+
+/* ── Alert spacing ── */
+.alert { margin-top: 10px !important; margin-bottom: 10px !important; padding: 10px 16px !important; }
+
+/* ── Bar chart y-axis label spacing (wider left margin) ── */
+.gtitle { font-size: 14px !important; }
+.ytick text { font-size: 12px !important; }
+
+/* ── Plotly bar chart left padding for country names ── */
+.plot-container { padding-left: 4px !important; }
+
+/* ── Multi-select tag spacing ── */
+.Select--multi .Select-value {
+    margin: 3px 4px !important;
+    padding: 2px 8px !important;
+}
+
+/* ── Button spacing ── */
+.btn { padding: 8px 20px !important; font-weight: 600 !important; letter-spacing: 0.04em !important; }
+
+/* ── Header spacing ── */
+h2 { margin-bottom: 4px !important; letter-spacing: -0.02em !important; }
+.text-muted { margin-bottom: 12px !important; }
+
+/* ── KPI cards ── */
+.card .d-flex { gap: 12px !important; }
