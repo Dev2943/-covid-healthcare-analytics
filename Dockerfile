@@ -10,6 +10,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Build the CmdStan backend that Prophet needs (fixes 'no attribute stan_backend')
+RUN python -m cmdstanpy.install_cmdstan --verbose
+
 COPY . .
 
 # Download + trim the COVID dataset at BUILD time → small file, instant startup
