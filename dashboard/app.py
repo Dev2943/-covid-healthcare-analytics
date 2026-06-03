@@ -33,6 +33,7 @@ from src.preprocessing import (
     prepare_forecasting,
 )
 from src.forecasting import run_forecast_pipeline
+from src.monte_carlo import run_monte_carlo
 
 # ── Colour palette ─────────────────────────────────────────────────────────
 BRAND_BLUE    = "#1a73e8"
@@ -334,6 +335,16 @@ app.layout = html.Div([
                 ]),
 
                 dcc.Graph(id="forecast-chart", style={"height": "450px"}),
+
+                html.H6("🎲 Monte Carlo Scenario Simulation",
+                        style={"color": TEXT_LIGHT, "marginTop": "24px"}),
+                html.P("1,000 simulated outbreak trajectories using a geometric random-walk "
+                       "calibrated to recent volatility — the epidemiological analogue of "
+                       "Value-at-Risk for capacity planning.",
+                       className="text-muted", style={"fontSize": "0.8rem"}),
+                dcc.Graph(id="monte-carlo-chart", style={"height": "420px"}),
+                html.Div(id="car-card"),
+
                 dbc.Row([
                     dbc.Col(dcc.Graph(id="forecast-components", style={"height": "350px"})),
                     dbc.Col([
@@ -561,6 +572,8 @@ def update_resource(countries, start_date, end_date):
 # Forecasting
 @app.callback(
     Output("forecast-chart",       "figure"),
+    Output("monte-carlo-chart",    "figure"),
+    Output("car-card",             "children"),
     Output("forecast-components",  "figure"),
     Output("forecast-summary-table","children"),
     Output("fc-status",            "children"),
@@ -579,7 +592,7 @@ def run_forecast(n_clicks, country, target_col, horizon):
         if len(df_p) < 60:
             msg = f"⚠ Not enough data for {country} ({target_col}). Try a different target."
             empty = go.Figure().update_layout(**CHART_LAYOUT)
-            return empty, empty, msg, msg
+            return empty, empty, "", empty, msg, msg
 
         results  = run_forecast_pipeline(df_p, forecast_horizon_days=horizon, run_eval=False)
         forecast = results["forecast"]
@@ -666,7 +679,56 @@ def run_forecast(n_clicks, country, target_col, horizon):
         ], bordered=True, hover=True, responsive=True, size="sm",
            style={"color": TEXT_LIGHT, "backgroundColor": CARD_BG})
 
-        return fig, comp_fig, table, f"✅ Forecast complete for {country}"
+        # ── Monte Carlo scenario simulation ──
+        try:
+            mc = run_monte_carlo(df_p, horizon_days=horizon, n_simulations=1000)
+            mc_fig = go.Figure()
+            # 95% band
+            mc_fig.add_trace(go.Scatter(
+                x=list(mc["dates"]) + list(mc["dates"][::-1]),
+                y=list(mc["upper_95"]) + list(mc["lower_95"][::-1]),
+                fill="toself", fillcolor="rgba(231, 111, 81, 0.15)",
+                line=dict(color="rgba(0,0,0,0)"), name="95% Scenario Range",
+            ))
+            # 50% band
+            mc_fig.add_trace(go.Scatter(
+                x=list(mc["dates"]) + list(mc["dates"][::-1]),
+                y=list(mc["upper_50"]) + list(mc["lower_50"][::-1]),
+                fill="toself", fillcolor="rgba(42, 157, 143, 0.25)",
+                line=dict(color="rgba(0,0,0,0)"), name="50% Scenario Range",
+            ))
+            # expected path
+            mc_fig.add_trace(go.Scatter(
+                x=mc["dates"], y=mc["expected"],
+                name="Expected (median)", mode="lines",
+                line=dict(color=BRAND_BLUE, width=2.5),
+            ))
+            mc_fig.update_layout(
+                **CHART_LAYOUT,
+                title=f"Monte Carlo — {mc['n_simulations']} Simulated Trajectories ({label}, {country})",
+                xaxis_title="", yaxis_title=label,
+            )
+
+            car = mc["case_at_risk"]
+            expected_peak = mc["expected"].max()
+            car_card = dbc.Row([
+                dbc.Col(dbc.Card(dbc.CardBody([
+                    html.Div("Expected Peak", className="text-muted", style={"fontSize": "0.8rem"}),
+                    html.H4(f"{expected_peak:,.0f}", style={"color": BRAND_BLUE, "fontWeight": "700"}),
+                    html.Small("Median scenario — staffing baseline", className="text-muted"),
+                ]), style={"backgroundColor": CARD_BG, "border": f"1px solid {BRAND_BLUE}33"}), md=6),
+                dbc.Col(dbc.Card(dbc.CardBody([
+                    html.Div("🚨 Case-at-Risk (95%)", className="text-muted", style={"fontSize": "0.8rem"}),
+                    html.H4(f"{car:,.0f}", style={"color": BRAND_RED, "fontWeight": "700"}),
+                    html.Small("95% worst-case peak — surge capacity to keep on standby", className="text-muted"),
+                ]), style={"backgroundColor": CARD_BG, "border": f"1px solid {BRAND_RED}33"}), md=6),
+            ], className="mb-2")
+        except Exception as mc_err:
+            print("MONTE CARLO ERROR:", mc_err)
+            mc_fig = go.Figure().update_layout(**CHART_LAYOUT, title="Monte Carlo unavailable")
+            car_card = ""
+
+        return fig, mc_fig, car_card, comp_fig, table, f"✅ Forecast complete for {country}"
 
     except Exception as e:
         err = traceback.format_exc()
@@ -676,7 +738,7 @@ def run_forecast(n_clicks, country, target_col, horizon):
             html.P(f"❌ Error: {str(e)}", style={"color": "red"}),
             html.Pre(err, style={"color": "orange", "fontSize": "0.7rem"}),
         ])
-        return empty, empty, error_msg, f"❌ Error: {str(e)}"
+        return empty, empty, "", empty, error_msg, f"❌ Error: {str(e)}"
 
 
 # ── Entry point ──────────────────────────────────────────────────────────────
