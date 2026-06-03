@@ -15,7 +15,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s â€” %(levelname)s â€
 logger = logging.getLogger(__name__)
 
 OWID_URL = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
-CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "owid_covid_data.csv")
+# Fixed absolute path (baked in at Docker build); falls back to local relative path for dev
+CACHE_PATH = os.environ.get(
+    "COVID_DATA_PATH",
+    "/app/data/owid_covid_data.csv"
+    if os.path.exists("/app/data/owid_covid_data.csv")
+    else os.path.join(os.path.dirname(__file__), "..", "data", "owid_covid_data.csv")
+)
 
 # Columns we care about for this project
 COLUMNS_OF_INTEREST = [
